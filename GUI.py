@@ -266,9 +266,41 @@ class Application(ttk.Frame):
         self.cpu_ratio_slider.pack(
             side=RIGHT
         )
+        self.theme_select_frame = ttk.Frame(
+            self
+        )
+        self.theme_select_frame.grid(
+            column=0,
+            row=2,
+            columnspan=2
+            )
+        self.theme_select = ttk.Combobox(
+            self.theme_select_frame,
+        )
+        self.theme_select['values']=['cosmo',
+                       'flatly',
+                       'journal',
+                       'litera',
+                       'lumen',
+                       'minty',
+                       'pulse',
+                       'sandstone',
+                       'united',
+                       'yeti',
+                       'morph',
+                       'darkly',
+                       'cyborg',
+                       'superhero',
+                       'solar']
+        self.theme_select.insert('end',self.Mode)
+        self.theme_select_label = ttk.Label(
+            self.theme_select_frame,
+            text="\nSelect a theme:                 \n"
+        )
+        self.theme_select_label.pack(side=LEFT)
+        self.theme_select.pack(side=RIGHT)
         #adjust view mode
         #adjust price
-        #
         #enable laptop mode - do last!
     
     def load_settings(self):
