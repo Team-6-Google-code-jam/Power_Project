@@ -19,7 +19,7 @@ class Application(ttk.Frame):
         super().__init__(*args, **kwargs)
         self.pack(fill="both", expand=True, side=TOP)
         style = Style("superhero")
-        style.configure('TEntry', font=('Helvetica', 24))
+        # style.configure('TEntry', font=('Helvetica', 24))
         
         self.input = ttk.Frame(self)
         self.input.grid(row=0,column=0,sticky="nsew")
@@ -41,31 +41,36 @@ class Application(ttk.Frame):
         self.time += 0.1
         self.time = round(self.time,1)
         self.time_monitor_meter.configure(amountused=self.time)
-        self.power_monitor_meter.configure(amountused=r.randint(0,200))
+        self.power_monitor_meter.configure(amountused=cpu_percent() * 10)
         self.Cost.configure(text=f'£{round(float(self.time * self.Rate),2)}')
         self.time_monitor_meter.after(200,self.update)
         
     def mainpage(self):
         self.Cost_Display = ttk.Frame(self)
-        self.Cost_Display.grid(row= 1, column=1, sticky="nsew")
+        self.Cost_Display.grid(row= 1, column=1,rowspan=2, sticky="nsew")
         self.Cost_header = ttk.Label(self.Cost_Display,text="Estimated cost for this session:",font=('Helvetica', 24))
         self.Cost = ttk.Label(self.Cost_Display,text="£0.00",font=('Helvetica', 24))
         self.Cost_header.pack()
         self.Cost.pack()
         
-        self.time_monitor = ttk.Frame(self)
+        self.time_monitor = ttk.Frame(self,style="default")
         self.time_monitor.grid(row=1, column=0, sticky="nsew")
         self.time_monitor_header = ttk.Label(self.time_monitor,text='Uptime this Session:')
-        self.time_monitor_meter = ttk.Meter(self.time_monitor, bootstyle="info", textright="", subtext="Hours", amountused=0, interactive=False,amounttotal=24)
+        self.time_monitor_meter = ttk.Meter(self.time_monitor, bootstyle="info", textright="", subtext="Hours", amountused=0, interactive=False,amounttotal=24,stripethickness=10)
         self.time_monitor_header.pack()
         self.time_monitor_meter.pack(fill="both", expand=True, side=TOP, pady=30, padx=30)
         
-        self.power_monitor = ttk.Frame(self)
+        self.power_monitor = ttk.Frame(self,style='default')
         self.power_monitor.grid(row=2, column=0, sticky="nsew")
         self.power_monitor_header = ttk.Label(self.power_monitor,text='Power Usage:')
-        self.power_monitor_meter = ttk.Meter(self.power_monitor, bootstyle="info", textright="", subtext="W/h", amountused=0,metertype='semi', interactive=False,amounttotal=1000)
+        self.power_monitor_meter = ttk.Meter(self.power_monitor, bootstyle="info", textright="", subtext="W/h", amountused=0,metertype='semi', interactive=False,amounttotal=1000,subtextstyle="primary")
         self.power_monitor_header.pack()
         self.power_monitor_meter.pack(fill="both", expand=True, side=TOP, pady=30, padx=30)
+        
+        self.settings = ttk.Frame(self,style="secondary")
+        self.settings.grid(column=0,row=0,columnspan=2, sticky="nsew")
+        self.settings_button  = ttk.Button(self.settings,text='Settings')
+        self.settings_button.pack(side=LEFT)
         
         self.after(100,self.update)
     
@@ -81,7 +86,6 @@ class Application(ttk.Frame):
             if item.winfo_children():
                 windows.extend(item.winfo_children())
         for item in windows:
-            print('passed')
             item.destroy()
         self.mainpage()
         
