@@ -1,10 +1,11 @@
+import json
 import requests
 from datetime import datetime
 
 def get_electricity_prices(dno):
     url = "https://odegdcpnma.execute-api.eu-west-2.amazonaws.com/development/prices"
     
-    # Get current date and time
+  
     current_datetime = datetime.now()
     
     # Format the date and time as needed
@@ -21,7 +22,7 @@ def get_electricity_prices(dno):
     response = requests.get(url, params=params)
 
     if response.status_code == 200:
-        data = response.json()  # Assuming the response is in JSON format
+        data = response.json()  
         return data
     else:
         print("Failed to fetch data. Status code:", response.status_code)
