@@ -329,63 +329,72 @@ class Application(ttk.Frame):
             self.counties = {
                 
             }
-            self.input = ttk.Frame(
+            self.manual_Frame = ttk.Frame(
                 self
-                )
-            self.input.grid(
+            )
+            self.manual_Frame.grid(
                 row=0,
-                column=0,
-                sticky="nsew"
-                )
+                column=0
+            )
             self.manual_label = ttk.Label(
-                self.input,
-                text='Enter price Per Kwh manually:'
+                self.manual_Frame,
+                text='\nEnter price Per Kwh manually:                   \n'
                 )
             self.manual_input = ttk.Entry(
-                self.input
+                self.manual_Frame
                 )
+            self.manual_label.pack(side=LEFT)
+            self.manual_input.pack(side=RIGHT)
+            self.manual_Middle_frame = ttk.Frame(
+                self
+                )
+            
             self.manual_Button = ttk.Button(
-                self.input,
+                self.manual_Middle_frame,
                 text = 'Submit',
-                command=self.manual_push_cost
+                command=self.manual_push_cost,
+                style="success"
                 )
-            self.manual_label.grid(
-                row=0
-                )
-            self.manual_Button.grid(
-                row=2
-                )
-            self.manual_input.grid(
-                row=1
-                )
+            self.manual_Middle_frame.grid(
+                row=1,
+                column=0,
+            )
             self.or_label = ttk.Label(
-                self.input,
-                text='or'
+                self.manual_Middle_frame,
+                text='\nor\n'
                 )
+            self.manual_Button.pack(side=TOP)
+            self.or_label.pack(side=BOTTOM)
+            self.drop_frame = ttk.Frame(
+                self
+            )
+            self.drop_frame.grid(
+                row=2,
+                column=0
+            )
             self.drop_label = ttk.Label(
-                self.input,
-                text='Select region from List:'
+                self.drop_frame,
+                text='\nSelect region from List:                           \n'
                 )
             self.drop_input = ttk.Combobox(
-                self.input
+                self.drop_frame
                 )
+            self.drop_label.pack(side=LEFT)
+            self.drop_input.pack(side=RIGHT)
+            self.drop_Button_frame=ttk.Frame(
+                self
+            )
+            self.drop_Button_frame.grid(
+                row=3,
+                column=0
+            )
             self.drop_Button = ttk.Button(
-                self.input,
+                self.drop_Button_frame,
                 text = 'Submit',
-                command=self.drop_push_cost
+                command=self.drop_push_cost,
+                style='success'
                 )
-            self.or_label.grid(
-                row=3
-                )
-            self.drop_label.grid(
-                row=4
-                )
-            self.drop_input.grid(
-                row=5
-                )
-            self.drop_Button.grid(
-                row=6
-                )
+            self.drop_Button.pack()
         else:
             with open (
                 'settings.json',
