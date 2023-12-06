@@ -216,24 +216,24 @@ class Application(ttk.Frame):
         
         self.after(100,self.update)
     def settingspage(self):
-        self.settings = ttk.Frame(
+        self.mainbar = ttk.Frame(
             self,
             style="secondary"
             )
-        self.settings.grid(
+        self.mainbar.grid(
             column=0,
             row=0,
             columnspan=2,
             sticky="nsew"
             )
         self.home_button  = ttk.Button(
-            self.settings,
+            self.mainbar,
             text='Home',
             command=self.tomain,
             style='danger'
             )
         self.settings_button  = ttk.Button(
-            self.settings,
+            self.mainbar,
             text='Save',
             style='success'
             )
@@ -243,7 +243,33 @@ class Application(ttk.Frame):
         self.settings_button.pack(
             side=LEFT
             )
-        
+        self.cpu_ratio_frame = ttk.Frame(
+            self
+        )
+        self.cpu_ratio_frame.grid(
+            column=0,
+            row=1,
+            columnspan=2
+            )
+        self.cpu_ratio_Label = ttk.Label(
+            self.cpu_ratio_frame,
+            text='\nFine tune Cpu power draw              \n'
+        )
+        self.cpu_ratio_slider = ttk.Scale(
+            self.cpu_ratio_frame,
+            to=100,
+            value=self.cpu_ratio
+        )
+        self.cpu_ratio_Label.pack(
+            side=LEFT
+        )
+        self.cpu_ratio_slider.pack(
+            side=RIGHT
+        )
+        #adjust view mode
+        #adjust price
+        #
+        #enable laptop mode - do last!
     
     def load_settings(self):
         '''
@@ -331,7 +357,6 @@ class Application(ttk.Frame):
         Loads default settings 
         '''
         settings = {'CPU Ratio':10,
-                    'GPU Ratio':0,
                     'Rate':float(self.manual_input.get()),
                     'Mode': 'superhero'}
         with open(
