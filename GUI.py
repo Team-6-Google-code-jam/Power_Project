@@ -235,7 +235,8 @@ class Application(ttk.Frame):
         self.settings_button  = ttk.Button(
             self.mainbar,
             text='Save',
-            style='success'
+            style='success',
+            command=self.update_settings
             )
         self.home_button.pack(
             side=LEFT
@@ -299,8 +300,24 @@ class Application(ttk.Frame):
         )
         self.theme_select_label.pack(side=LEFT)
         self.theme_select.pack(side=RIGHT)
-        #adjust view mode
-        #adjust price
+        self.adjust_price_frame = ttk.Frame(
+            self
+        )
+        self.adjust_price_frame.grid(
+            column=0,
+            row=3,
+            columnspan=2
+            )
+        self.adjust_price = ttk.Entry(
+            self.adjust_price_frame
+        )
+        self.adjust_price.insert('end',self.Rate)
+        self.adjust_price_label = ttk.Label(
+            self.adjust_price_frame,
+            text= '\nAdjust price per Kw/h:         £\n'
+        )
+        self.adjust_price.pack(side=RIGHT)
+        self.adjust_price_label.pack(side=LEFT)
         #enable laptop mode - do last!
     
     def load_settings(self):
@@ -384,6 +401,22 @@ class Application(ttk.Frame):
             self.Mode = options['Mode']
             self.tomain()
 
+    def update_settings(self):
+        self.Rate = float(self.adjust_price.get())
+        self.Mode = self.theme_select.get()
+        self.cpu_ratio = self.cpu_ratio_slider.get()
+        settings = {'CPU Ratio':self.cpu_ratio,
+                    'Rate':self.Rate,
+                    'Mode': self.Mode}
+        with open(
+            'settings.json',
+            'w',
+            encoding="utf-8") as path:
+            json.dump(
+                settings,
+                path
+                )
+    
     def manual_push_cost(self):
         '''
         Loads default settings 
