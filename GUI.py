@@ -9,34 +9,16 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
 import numpy as np
 from matplotlib.figure import Figure
+from os.path import exists
+import json
+
 class Application(ttk.Frame):
     def __init__(self, *args, **kwargs):
-        
-        self.counties = {
-            
-        }
         self.time = 0
         super().__init__(*args, **kwargs)
         self.pack(fill="both", expand=True, side=TOP)
         style = Style("superhero")
-        # style.configure('TEntry', font=('Helvetica', 24))
-        
-        self.input = ttk.Frame(self)
-        self.input.grid(row=0,column=0,sticky="nsew")
-        self.manual_label = ttk.Label(self.input,text='Enter price Per Kwh manually:')
-        self.manual_input = ttk.Entry(self.input)
-        self.manual_Button = ttk.Button(self.input,text = 'Submit',command=self.manual_push_cost)
-        self.manual_label.grid(row=0)
-        self.manual_Button.grid(row=2)
-        self.manual_input.grid(row=1)
-        self.or_label = ttk.Label(self.input,text='or')
-        self.drop_label = ttk.Label(self.input,text='Select region from List:')
-        self.drop_input = ttk.Combobox(self.input)
-        self.drop_Button = ttk.Button(self.input,text = 'Submit',command=self.drop_push_cost)
-        self.or_label.grid(row=3)
-        self.drop_label.grid(row=4)
-        self.drop_input.grid(row=5)
-        self.drop_Button.grid(row=6)
+        self.load_settings()
     def update(self):
         self.time += 0.1
         self.time = round(self.time,1)
@@ -46,10 +28,15 @@ class Application(ttk.Frame):
         self.time_monitor_meter.after(200,self.update)
         
     def mainpage(self):
-        self.Cost_Display = ttk.Frame(self)
+        style = Style(self.Mode)
+        self.Cost_Display = ttk.Frame(self,style='dark')
         self.Cost_Display.grid(row= 1, column=1,rowspan=2, sticky="nsew")
-        self.Cost_header = ttk.Label(self.Cost_Display,text="Estimated cost for this session:",font=('Helvetica', 24))
-        self.Cost = ttk.Label(self.Cost_Display,text="£0.00",font=('Helvetica', 24))
+        self.Cost_header = ttk.Label(self.Cost_Display,text="\n\n\nEstimated cost for this session:\n",font=('Helvetica', 24),bootstyle="inverse-dark")
+        self.Cost = ttk.Label(self.Cost_Display,text="£0.00",font=('Helvetica', 24),bootstyle="inverse-dark")
+        self.average_header = ttk.Label(self.Cost_Display,text="\n\n\nAverage system power draw:\n",font=('Helvetica', 24),bootstyle="inverse-dark")
+        self.average = ttk.Label(self.Cost_Display,text="135.06w",font=('Helvetica', 24),bootstyle="inverse-dark")
+        self.average_header.pack()
+        self.average.pack()
         self.Cost_header.pack()
         self.Cost.pack()
         
@@ -74,9 +61,48 @@ class Application(ttk.Frame):
         
         self.after(100,self.update)
     
+    def load_settings(self):
+        if not exists('settings.json'):
+            self.counties = {
+                
+            }
+            
+            # style.configure('TEntry', font=('Helvetica', 24))
+            
+            self.input = ttk.Frame(self)
+            self.input.grid(row=0,column=0,sticky="nsew")
+            self.manual_label = ttk.Label(self.input,text='Enter price Per Kwh manually:')
+            self.manual_input = ttk.Entry(self.input)
+            self.manual_Button = ttk.Button(self.input,text = 'Submit',command=self.manual_push_cost)
+            self.manual_label.grid(row=0)
+            self.manual_Button.grid(row=2)
+            self.manual_input.grid(row=1)
+            self.or_label = ttk.Label(self.input,text='or')
+            self.drop_label = ttk.Label(self.input,text='Select region from List:')
+            self.drop_input = ttk.Combobox(self.input)
+            self.drop_Button = ttk.Button(self.input,text = 'Submit',command=self.drop_push_cost)
+            self.or_label.grid(row=3)
+            self.drop_label.grid(row=4)
+            self.drop_input.grid(row=5)
+            self.drop_Button.grid(row=6)
+        else:
+            with open ('settings.json','r+',encoding="utf-8") as options:
+                options = json.load(options)
+            self.cpu_ratio = options['CPU Ratio']
+            self.gpu_ratio = options['GPU Ratio']
+            self.Rate = float(options['Rate'])
+            self.Mode = options['Mode']
+            self.mainpage()
+
     def manual_push_cost(self):
-        self.Rate = float(self.manual_input.get())
+        settings = {'CPU Ratio':10,
+                    'GPU Ratio':0,
+                    'Rate':float(self.manual_input.get()),
+                    'Mode': 'superhero'}
+        with open('settings.json','w',encoding="utf-8") as path:
+            json.dump(settings,path)
         self.wipe()
+        self.load_settings()
         
     
     def wipe(self):
@@ -87,7 +113,6 @@ class Application(ttk.Frame):
                 windows.extend(item.winfo_children())
         for item in windows:
             item.destroy()
-        self.mainpage()
         
     def drop_push_cost(self):
         pass
