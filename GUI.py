@@ -32,6 +32,7 @@ class Application(ttk.Frame):
             "superhero"
             )
         self.total_use=0
+        #create a dict of regions and their corresponding api codes
         self.regions = {
             'Eastern England':10,
             'East Midlands':11,
@@ -55,13 +56,12 @@ class Application(ttk.Frame):
         Run An update cycle
         '''
         self.time = (computer_uptime() / (60 ** 2))
-        self.current_draw = get_power(65,150)
+        self.current_draw = get_power(self.base_power,self.max_power)
         self.average_cache.append(
             self.current_draw
             )
         if self.total_use == 0:
-            self.total_use = get_total_energy(65,150)
-            print(get_total_energy(20,100))
+            self.total_use = get_total_energy(self.base_power,self.max_power)
         else:
             self.total_use += (self.current_draw / (60 ** 2))
         self.price = self.total_use * self.Rate * 0.001
@@ -309,27 +309,53 @@ class Application(ttk.Frame):
         self.settings_button.pack(
             side=LEFT
             )
-        self.cpu_ratio_frame = ttk.Frame(
+        self.base_power_frame = ttk.Frame(
             self
         )
-        self.cpu_ratio_frame.grid(
+        self.base_power_frame.grid(
             column=0,
             row=1,
             columnspan=2
             )
-        self.cpu_ratio_Label = ttk.Label(
-            self.cpu_ratio_frame,
-            text='\nFine tune Cpu power draw              \n'
+        self.base_power_Label = ttk.Label(
+            self.base_power_frame,
+            text='\nFine tune base power draw              \n'
         )
-        self.cpu_ratio_slider = ttk.Scale(
-            self.cpu_ratio_frame,
-            to=100,
-            value=self.cpu_ratio
+        self.base_power_slider = ttk.Scale(
+            self.base_power_frame,
+            to=200,
+            value=self.base_power
         )
-        self.cpu_ratio_Label.pack(
+        self.base_power_Label.pack(
             side=LEFT
         )
-        self.cpu_ratio_slider.pack(
+        self.base_power_slider.pack(
+            side=RIGHT
+        )
+        self.base_power_frame = ttk.Frame(
+            self
+        )
+        self.max_power_frame = ttk.Frame(
+            self
+        )
+        self.max_power_frame.grid(
+            column=0,
+            row=2,
+            columnspan=2
+            )
+        self.max_power_Label = ttk.Label(
+            self.max_power_frame,
+            text='\nFine tune max power draw              \n'
+        )
+        self.max_power_slider = ttk.Scale(
+            self.max_power_frame,
+            to=750,
+            value=self.max_power
+        )
+        self.max_power_Label.pack(
+            side=LEFT
+        )
+        self.max_power_slider.pack(
             side=RIGHT
         )
         self.theme_select_frame = ttk.Frame(
@@ -337,7 +363,7 @@ class Application(ttk.Frame):
         )
         self.theme_select_frame.grid(
             column=0,
-            row=2,
+            row=3,
             columnspan=2
             )
         self.theme_select = ttk.Combobox(
@@ -370,7 +396,7 @@ class Application(ttk.Frame):
         )
         self.adjust_price_frame.grid(
             column=0,
-            row=3,
+            row=4,
             columnspan=2
             )
         self.adjust_price = ttk.Entry(
@@ -387,7 +413,7 @@ class Application(ttk.Frame):
             self
         )
         self.laptop_mode_frame.grid(
-            row=4,
+            row=5,
             column=1
         )
         self.laptop_toggle = ttk.Checkbutton(
@@ -403,9 +429,11 @@ class Application(ttk.Frame):
     def load_settings(self):
         '''
         If there is no config file, loads a window allowing
-        the user to input their electricity costs.
+        the user to input their electricity costs. Otherwise,
+        loads data from json.
         '''
         if not exists('settings.json'):
+            #Generate the setting page if theres no setup file
             self.manual_Frame = ttk.Frame(
                 self
             )
@@ -474,6 +502,7 @@ class Application(ttk.Frame):
                 )
             self.drop_Button.pack()
         else:
+            #open json file and set appropriate values
             with open (
                 'settings.json',
                 'r+',encoding="utf-8"
@@ -481,7 +510,8 @@ class Application(ttk.Frame):
                 options = json.load(
                     options
                     )
-            self.cpu_ratio = options['CPU Ratio']
+            self.max_power = options['max power']
+            self.base_power = options['base power']
             self.Rate = float(
                 options['Rate']
                 )
@@ -491,11 +521,17 @@ class Application(ttk.Frame):
             self.tomain()
 
     def update_settings(self):
+        '''
+        Push custom settings to the settings file in the event that
+        they are changed in settings.
+        '''
         self.Rate = float(self.adjust_price.get())
         self.Mode = self.theme_select.get()
-        self.cpu_ratio = self.cpu_ratio_slider.get()
+        self.max_power = self.max_power_slider.get()
         self.laptop_mode = self.laptop_var.get()
-        settings = {'CPU Ratio':self.cpu_ratio,
+        self.base_power = self.base_power_slider.get()
+        settings = {'base power':self.base_power,
+                    'max power':self.max_power,
                     'Rate':self.Rate,
                     'Mode': self.Mode,
                     'Laptop Mode':self.laptop_mode}
@@ -512,7 +548,8 @@ class Application(ttk.Frame):
         '''
         Loads default settings and human cost input
         '''
-        settings = {'CPU Ratio':10,
+        settings = {'base power':65,
+                    'max power':150,
                     'Rate':float(self.manual_input.get()),
                     'Mode': 'superhero',
                     'Laptop Mode':False}
@@ -538,8 +575,9 @@ class Application(ttk.Frame):
         '''
         Loads default settings 
         '''
-        settings = {'CPU Ratio':10,
-                    'Rate':get_electricity_price(self.drop_input.get()),
+        settings = {'base power':65,
+                    'max power':150,
+                    'Rate':get_electricity_price(self.regions[self.drop_input.get()]/100),
                     'Mode': 'superhero',
                     'Laptop Mode':False}
         with open(
