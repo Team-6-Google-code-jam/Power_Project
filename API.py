@@ -22,8 +22,8 @@ def get_electricity_price(dno):
 
     if response.status_code == 200:
         data = response.json()  
-        overall_price = data.get('data', {}).get('data', [{}])[0].get('Overall')
-        return overall_price
+        avg_price = data.get('data', {}).get('data', [{}])[0].get('Overall')
+        return avg_price
     else:
         print("Failed to fetch data. Status code:", response.status_code)
         return None
