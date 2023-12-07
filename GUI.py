@@ -1,7 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap import Style
-from psutil import cpu_percent
+from psutil import cpu_percent,sensors_battery
 # from psutil import sensors_battery
 from os.path import exists
 import json
@@ -13,6 +13,8 @@ class Application(ttk.Frame):
         On initialization, define constants and load 
         settings
         '''
+        self.battery = sensors_battery()
+        self.laptop_var = ttk.BooleanVar()
         self.timeconversion = 1/60/60/5
         self.time = 0
         self.average_cache = deque(
@@ -68,6 +70,8 @@ class Application(ttk.Frame):
         self.total.configure(
             text=f'{round(self.total_use,2)}w'
                 )
+        if self.laptop_mode:
+            self.getbattery()
         self.Cost.after(
             200,
             self.update
@@ -85,7 +89,7 @@ class Application(ttk.Frame):
         self.Cost_Display.grid(
             row= 1,
             column=1,
-            rowspan=2, 
+            rowspan=3, 
             sticky="nsew"
             )
         self.Cost_header = ttk.Label(
@@ -195,6 +199,53 @@ class Application(ttk.Frame):
             padx=30
             )
         
+        if self.laptop_mode:
+            self.battery_frame = ttk.Frame(
+                self,
+                style='default'
+                )
+            self.battery_frame.grid(
+                row=3,
+                column=0,
+                sticky="nsew"
+                )
+            self.battery_frame_header = ttk.Label(
+                self.battery_frame,
+                text='Battery remaining:'
+                )
+            self.battery_capcity = ttk.Meter(
+                self.battery_frame,
+                bootstyle="info", 
+                textright="", 
+                subtext="%", 
+                amountused=0,
+                style="success",
+                interactive=False,
+                amounttotal=100,
+                subtextstyle="primary"
+                )
+            self.battery_frame_header.pack()
+            self.battery_capcity.pack(
+                fill="both",
+                expand=True,
+                side=TOP,
+                pady=30,
+                padx=30
+                )
+            self.time_remaining_header = ttk.Label(
+                self.Cost_Display,
+                text="\n\nRemaining Battery time:\n",
+                font=('Helvetica', 24),
+                bootstyle="inverse-dark"
+                )
+            self.time_remaining = ttk.Label(
+                self.Cost_Display,
+                text=f'',
+                font=('Helvetica', 24),
+                bootstyle="inverse-dark"
+                )
+            self.time_remaining_header.pack()
+            self.time_remaining.pack()
         self.settings = ttk.Frame(
             self,
             style="secondary"
@@ -318,7 +369,22 @@ class Application(ttk.Frame):
         )
         self.adjust_price.pack(side=RIGHT)
         self.adjust_price_label.pack(side=LEFT)
-        #enable laptop mode - do last!
+        self.laptop_mode_frame=ttk.Frame(
+            self
+        )
+        self.laptop_mode_frame.grid(
+            row=4,
+            column=1
+        )
+        self.laptop_toggle = ttk.Checkbutton(
+            self.laptop_mode_frame,
+            text='Enable Laptop Mode',
+            style='Roundtoggle.Toolbutton',
+            variable=self.laptop_var
+        )
+        self.laptop_toggle.pack(
+            side=RIGHT
+        )
     
     def load_settings(self):
         '''
@@ -408,15 +474,19 @@ class Application(ttk.Frame):
                 options['Rate']
                 )
             self.Mode = options['Mode']
+            self.laptop_mode = options['Laptop Mode']
+            self.laptop_var.set(self.laptop_mode)
             self.tomain()
 
     def update_settings(self):
         self.Rate = float(self.adjust_price.get())
         self.Mode = self.theme_select.get()
         self.cpu_ratio = self.cpu_ratio_slider.get()
+        self.laptop_mode = self.laptop_var.get()
         settings = {'CPU Ratio':self.cpu_ratio,
                     'Rate':self.Rate,
-                    'Mode': self.Mode}
+                    'Mode': self.Mode,
+                    'Laptop Mode':self.laptop_mode}
         with open(
             'settings.json',
             'w',
@@ -432,7 +502,8 @@ class Application(ttk.Frame):
         '''
         settings = {'CPU Ratio':10,
                     'Rate':float(self.manual_input.get()),
-                    'Mode': 'superhero'}
+                    'Mode': 'superhero',
+                    'Laptop Mode':False}
         with open(
             'settings.json',
             'w',
@@ -464,6 +535,20 @@ class Application(ttk.Frame):
     def tosettings(self):
         self.wipe()
         self.settingspage()
+        
+    def getbattery(self):
+        if self.battery is None:
+            self.time_remaining.configure(text="No Battery Detected!")
+            self.battery_capcity.configure(amountused=100)
+        elif self.battery.power_plugged:
+            self.time_remaining.configure(text="Battery Plugged in and charging")
+            self.battery_capcity.configure(amountused=100)
+        else:
+            timeleft = self.battery.secsleft
+            hours, remainder = divmod(timeleft, 3600)
+            minutes, _ = divmod(remainder, 60)
+            self.time_remaining.configure(text=f'{hours}h {minutes}m')
+            self.battery_capcity.configure(amountused=self.battery.percent)
 if __name__ == "__main__":
     app = ttk.Window("Power Monitor")
     Application(app)
