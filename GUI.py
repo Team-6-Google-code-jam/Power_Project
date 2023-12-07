@@ -281,6 +281,10 @@ class Application(ttk.Frame):
         
         self.update()
     def settingspage(self):
+        '''
+        Geterates a page for the user to input their
+        prefrence of settings
+        '''
         self.mainbar = ttk.Frame(
             self,
             style="secondary"
@@ -573,7 +577,8 @@ class Application(ttk.Frame):
         
     def drop_push_cost(self):
         '''
-        Loads default settings 
+        Loads default settings and makes an api request
+        to get power prices
         '''
         settings = {'base power':65,
                     'max power':150,
