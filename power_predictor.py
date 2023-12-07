@@ -20,16 +20,19 @@ def get_power(idle_power, max_power):
 
 # Gets the duration which the computer has been up for (in seconds)
 def computer_uptime():
+    file_path = os.path.dirname(
+            os.path.realpath(__file__)
+            )
+    with open(file_path + '\\timestamp.txt', 'r') as f:
+        start_time = float(f.read())
     current_time = time.time()
     duration = current_time - start_time
     return duration
 
 # Gets the total energy used since boot. Assumption: assumes the current power has been constant throughout the whole time
-def get_total_energy():
-    current_time = time.time()
-    energy_used = computer_uptime() * get_power() # Energy used since startup. (In joules)
-    energy_kwh = energy_used / 3600000 # Conversion from joules to KWh
-    return energy_kwh
+def get_total_energy(idle_power, max_power):
+    energy_used = (computer_uptime()/(60**2) ) * get_power(idle_power, max_power) # Energy used since startup. (In watts)
+    return energy_used
 
 # run this function to store the start time, and to dump it into the file
 def initialise():

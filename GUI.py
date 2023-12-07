@@ -6,6 +6,7 @@ from os.path import exists
 import json
 from collections import deque
 import numpy as np
+from power_predictor import *
 class Application(ttk.Frame):
     def __init__(self, *args, **kwargs):
         '''
@@ -13,7 +14,6 @@ class Application(ttk.Frame):
         settings
         '''
         self.laptop_var = ttk.BooleanVar()
-        self.timeconversion = 1/60/60/5
         self.time = 0
         self.average_cache = deque(
             maxlen=1000
@@ -37,17 +37,16 @@ class Application(ttk.Frame):
         '''
         Run An update cycle
         '''
-        self.time += self.timeconversion
-        self.current_draw = float(
-            cpu_percent() * self.cpu_ratio
-            )
+        self.time = (computer_uptime() / (60 ** 2))
+        self.current_draw = get_power(20,100)
         self.average_cache.append(
             self.current_draw
             )
         if self.total_use == 0:
-            self.total_use = self.time * 250
+            self.total_use = get_total_energy(20,100)
+            print(get_total_energy(20,100))
         else:
-            self.total_use += self.current_draw * self.timeconversion
+            self.total_use += (self.current_draw / (60 ** 2))
         self.price = self.total_use * self.Rate * 0.01
         self.Cost.configure(
             text=f'£{round(self.price,2)}')
@@ -71,7 +70,7 @@ class Application(ttk.Frame):
         if self.laptop_mode:
             self.getbattery()
         self.Cost.after(
-            200,
+            1000,
             self.update
             )
     def mainpage(self):
@@ -263,7 +262,7 @@ class Application(ttk.Frame):
             side=LEFT
             )
         
-        self.after(100,self.update)
+        self.update()
     def settingspage(self):
         self.mainbar = ttk.Frame(
             self,
