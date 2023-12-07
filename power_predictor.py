@@ -7,8 +7,6 @@ import getpass
 import os
 USER_NAME = getpass.getuser()
 
-
-
 # Sample values for the idle and max power (just for reference)
 # idle_power = 20
 # max_power = 80
@@ -20,7 +18,13 @@ def get_power(idle_power, max_power):
     estimated_power = idle_power + cpu_usage * (max_power - idle_power)
     return estimated_power
 
-# def get_total()
+# Gets the total energy used since boot. Assumption: assumes the current power has been constant throughout the whole time
+def get_total_energy():
+    current_time = time.time()
+    duration = current_time - start_time
+    energy_used = duration * get_power # Energy used since startup. (In joules)
+    energy_kwh = energy_used / 3600000 # Conversion from joules to KWh
+    return energy_kwh
 
 # run this function to store the start time, and to dump it into the file
 def initialise():
@@ -44,5 +48,6 @@ def add_to_startup(file_path=""):
             r'start "" "%s"' % file_path
             )
 
+# just for debugging purposes, this is not called in the final project
 if __name__ == '__main__':
     initialise()  
