@@ -55,14 +55,19 @@ class Application(ttk.Frame):
         '''
         Run An update cycle
         '''
+        #get uptime and convert to hours
         self.time = (computer_uptime() / (60 ** 2))
+        #get power draw stats
         self.current_draw = get_power(self.base_power,self.max_power)
+        #cache the value for calculating the average
         self.average_cache.append(
             self.current_draw
             )
         if self.total_use == 0:
+            #obtain an estimate for power use while the program wasn't running
             self.total_use = get_total_energy(self.base_power,self.max_power)
         else:
+            #Add the current draw to the running total
             self.total_use += (self.current_draw / (60 ** 2))
         self.price = self.total_use * self.Rate * 0.001
         self.Cost.configure(
@@ -603,24 +608,29 @@ class Application(ttk.Frame):
         self.mainpage()
 
     def tosettings(self):
+        '''
+        Wipe the page and load the settings screen
+        '''
         self.wipe()
         self.settingspage()
         
     def getbattery(self):
+        '''
+        update battery statistics
+        '''
         self.battery = sensors_battery()
         if self.battery is None:
+            #check if the device has a battery
             self.time_remaining.configure(text="No Battery Detected!")
             self.battery_capcity.configure(amountused=100)
         elif self.battery.power_plugged:
+            #check if the device is plugged in
             self.time_remaining.configure(text="Battery Plugged in and charging")
             self.battery_capcity.configure(amountused=100)
         else:
+            #obtain battery statistics
             timeleft = self.battery.secsleft
             hours, remainder = divmod(timeleft, 3600)
             minutes, _ = divmod(remainder, 60)
             self.time_remaining.configure(text=f'{hours}h {minutes}m')
             self.battery_capcity.configure(amountused=self.battery.percent)
-if __name__ == "__main__":
-    app = ttk.Window("Power Monitor")
-    Application(app)
-    app.mainloop()
