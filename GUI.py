@@ -575,8 +575,9 @@ class Application(ttk.Frame):
         '''
         Loads default settings 
         '''
-        settings = {'CPU Ratio':10,
-                    'Rate':get_electricity_price(self.drop_input.get()),
+        settings = {'base power':65,
+                    'max power':150,
+                    'Rate':get_electricity_price(self.regions[self.drop_input.get()])/100,
                     'Mode': 'superhero',
                     'Laptop Mode':False}
         with open(
