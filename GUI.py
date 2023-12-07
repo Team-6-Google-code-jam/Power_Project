@@ -2,7 +2,6 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap import Style
 from psutil import cpu_percent,sensors_battery
-# from psutil import sensors_battery
 from os.path import exists
 import json
 from collections import deque
@@ -13,7 +12,6 @@ class Application(ttk.Frame):
         On initialization, define constants and load 
         settings
         '''
-        self.battery = sensors_battery()
         self.laptop_var = ttk.BooleanVar()
         self.timeconversion = 1/60/60/5
         self.time = 0
@@ -378,7 +376,7 @@ class Application(ttk.Frame):
         )
         self.laptop_toggle = ttk.Checkbutton(
             self.laptop_mode_frame,
-            text='Enable Laptop Mode',
+            text='Enable Laptop Mode (Experimental)',
             style='Roundtoggle.Toolbutton',
             variable=self.laptop_var
         )
@@ -537,6 +535,7 @@ class Application(ttk.Frame):
         self.settingspage()
         
     def getbattery(self):
+        self.battery = sensors_battery()
         if self.battery is None:
             self.time_remaining.configure(text="No Battery Detected!")
             self.battery_capcity.configure(amountused=100)
