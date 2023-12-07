@@ -61,7 +61,6 @@ class Application(ttk.Frame):
             )
         if self.total_use == 0:
             self.total_use = get_total_energy(65,150)
-            print(get_total_energy(20,100))
         else:
             self.total_use += (self.current_draw / (60 ** 2))
         self.price = self.total_use * self.Rate * 0.001
@@ -539,7 +538,7 @@ class Application(ttk.Frame):
         Loads default settings 
         '''
         settings = {'CPU Ratio':10,
-                    'Rate':get_electricity_price(self.drop_input.get()),
+                    'Rate':(get_electricity_price(self.regions[self.drop_input.get()])/100),
                     'Mode': 'superhero',
                     'Laptop Mode':False}
         with open(
