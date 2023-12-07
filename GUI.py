@@ -1,12 +1,13 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap import Style
-from psutil import cpu_percent,sensors_battery
+from psutil import sensors_battery
 from os.path import exists
 import json
 from collections import deque
 import numpy as np
 from power_predictor import *
+from API import get_electricity_price
 class Application(ttk.Frame):
     def __init__(self, *args, **kwargs):
         '''
@@ -31,6 +32,22 @@ class Application(ttk.Frame):
             "superhero"
             )
         self.total_use=0
+        self.regions = {
+            'Eastern England':10,
+            'East Midlands':11,
+            'London':12,
+            'North Wales & Mersey':13,
+            'Midlands':14,
+            'North East':15,
+            'North West':16,
+            'Northern Scotland':17,
+            'Southern Scotland':18,
+            'South East':19,
+            'Southern':20,
+            'South Wales':21,
+            'South Western':22,
+            'Yorkshire':23
+        }
         self.load_settings()
         
     def update(self):
@@ -38,16 +55,16 @@ class Application(ttk.Frame):
         Run An update cycle
         '''
         self.time = (computer_uptime() / (60 ** 2))
-        self.current_draw = get_power(20,100)
+        self.current_draw = get_power(65,150)
         self.average_cache.append(
             self.current_draw
             )
         if self.total_use == 0:
-            self.total_use = get_total_energy(20,100)
+            self.total_use = get_total_energy(65,150)
             print(get_total_energy(20,100))
         else:
             self.total_use += (self.current_draw / (60 ** 2))
-        self.price = self.total_use * self.Rate * 0.01
+        self.price = self.total_use * self.Rate * 0.001
         self.Cost.configure(
             text=f'£{round(self.price,2)}')
         self.time_monitor_meter.configure(
@@ -65,7 +82,7 @@ class Application(ttk.Frame):
             text = f'{round(np.mean(self.average_cache),2)}w/h'
                     )
         self.total.configure(
-            text=f'{round(self.total_use,2)}w'
+            text=f'{round(self.total_use,2)}w/h'
                 )
         if self.laptop_mode:
             self.getbattery()
@@ -389,9 +406,6 @@ class Application(ttk.Frame):
         the user to input their electricity costs.
         '''
         if not exists('settings.json'):
-            self.counties = {
-                
-            }
             self.manual_Frame = ttk.Frame(
                 self
             )
@@ -442,6 +456,7 @@ class Application(ttk.Frame):
             self.drop_input = ttk.Combobox(
                 self.drop_frame
                 )
+            self.drop_input['values'] = [region for region in self.regions]
             self.drop_label.pack(side=LEFT)
             self.drop_input.pack(side=RIGHT)
             self.drop_Button_frame=ttk.Frame(
@@ -495,7 +510,7 @@ class Application(ttk.Frame):
     
     def manual_push_cost(self):
         '''
-        Loads default settings 
+        Loads default settings and human cost input
         '''
         settings = {'CPU Ratio':10,
                     'Rate':float(self.manual_input.get()),
@@ -520,7 +535,22 @@ class Application(ttk.Frame):
             item.destroy()
         
     def drop_push_cost(self):
-        pass
+        '''
+        Loads default settings 
+        '''
+        settings = {'CPU Ratio':10,
+                    'Rate':get_electricity_price(self.drop_input.get()),
+                    'Mode': 'superhero',
+                    'Laptop Mode':False}
+        with open(
+            'settings.json',
+            'w',
+            encoding="utf-8") as path:
+            json.dump(
+                settings,
+                path
+                )
+        self.load_settings()
     
     def tomain(self):
         '''
