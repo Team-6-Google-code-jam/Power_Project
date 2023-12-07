@@ -20,10 +20,15 @@ def get_power(idle_power, max_power):
     estimated_power = idle_power + cpu_usage * (max_power - idle_power)
     return estimated_power
 
+# def get_total()
+
 # run this function to store the start time, and to dump it into the file
 def initialise():
     start_time = time.time()
-    with open('timestamp.txt', 'w') as f:
+    file_path = os.path.dirname(
+            os.path.realpath(__file__)
+            )
+    with open(file_path + '\\timestamp.txt', 'w') as f:
         f.write(str(start_time))
 
 def add_to_startup(file_path=""):
@@ -40,4 +45,4 @@ def add_to_startup(file_path=""):
             )
 
 if __name__ == '__main__':
-    initialise()
+    initialise()  
