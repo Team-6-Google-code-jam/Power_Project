@@ -27,7 +27,7 @@ def computer_uptime():
 # Gets the total energy used since boot. Assumption: assumes the current power has been constant throughout the whole time
 def get_total_energy():
     current_time = time.time()
-    energy_used = computer_uptime() * get_power # Energy used since startup. (In joules)
+    energy_used = computer_uptime() * get_power() # Energy used since startup. (In joules)
     energy_kwh = energy_used / 3600000 # Conversion from joules to KWh
     return energy_kwh
 
