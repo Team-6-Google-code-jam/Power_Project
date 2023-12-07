@@ -18,11 +18,16 @@ def get_power(idle_power, max_power):
     estimated_power = idle_power + cpu_usage * (max_power - idle_power)
     return estimated_power
 
+# Gets the duration which the computer has been up for (in seconds)
+def computer_uptime():
+    current_time = time.time()
+    duration = current_time - start_time
+    return duration
+
 # Gets the total energy used since boot. Assumption: assumes the current power has been constant throughout the whole time
 def get_total_energy():
     current_time = time.time()
-    duration = current_time - start_time
-    energy_used = duration * get_power # Energy used since startup. (In joules)
+    energy_used = computer_uptime() * get_power # Energy used since startup. (In joules)
     energy_kwh = energy_used / 3600000 # Conversion from joules to KWh
     return energy_kwh
 
