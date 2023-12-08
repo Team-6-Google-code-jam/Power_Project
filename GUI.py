@@ -84,11 +84,16 @@ class Application(ttk.Frame):
                 2)
             )
         self.average.configure(
-            text = f'{round(np.mean(self.average_cache),2)}w/h'
+            text = f'{round(np.mean(self.average_cache),2)} w'
                     )
-        self.total.configure(
-            text=f'{round(self.total_use,2)}w/h'
-                )
+        if self.total_use* 3600 < 1000:
+            self.total.configure(
+                text=f'{round(self.total_use * 3600,1)} kJ'
+                    )
+        else:
+            self.total.configure(
+                text=f'{round(self.total_use * 3.6,1)} KJ'
+                    )
         if self.laptop_mode:
             self.getbattery()
         self.Cost.after(
@@ -202,11 +207,11 @@ class Application(ttk.Frame):
             self.power_monitor,
             bootstyle="info", 
             textright="", 
-            subtext="W/h", 
+            subtext="W", 
             amountused=0,
             metertype='semi',
             interactive=False,
-            amounttotal=1000,
+            amounttotal=self.max_power,
             subtextstyle="primary"
             )
         self.power_monitor_header.pack()
@@ -557,7 +562,7 @@ class Application(ttk.Frame):
         '''
         Loads default settings and human cost input
         '''
-        settings = {'base power':65,
+        settings = {'base power':50,
                     'max power':150,
                     'Rate':float(self.manual_input.get()),
                     'Mode': 'superhero',
@@ -585,7 +590,7 @@ class Application(ttk.Frame):
         Loads default settings and makes an api request
         to get power prices
         '''
-        settings = {'base power':65,
+        settings = {'base power':50,
                     'max power':150,
                     'Rate':get_electricity_price(self.regions[self.drop_input.get()])/100,
                     'Mode': 'superhero',
